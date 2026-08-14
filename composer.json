@@ -1,0 +1,68 @@
+{
+    "name": "azumamagus/get-cnpj",
+    "description": "Biblioteca PHP para consulta de CNPJ em APIs públicas brasileiras, com fallback entre provedores e rate limiting.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bruno da Cunha Felipe"
+        }
+    ],
+    "keywords": ["cnpj", "brasil", "receita-ws", "brasil-api", "cnpja", "cnpj-ws"],
+    "homepage": "https://github.com/azumamagus/getCNPJ-php",
+    "support": {
+        "issues": "https://github.com/azumamagus/getCNPJ-php/issues",
+        "source": "https://github.com/azumamagus/getCNPJ-php"
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.8",
+        "psr/http-client": "^1.0"
+    },
+    "require-dev": {
+        "codeigniter4/framework": "^4.4",
+        "illuminate/config": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
+        "phpunit/phpunit": "^10.5 || ^11.0 || ^12.0"
+    },
+    "suggest": {
+        "codeigniter4/framework": "Permite usar o cliente como service('getCnpj') no CodeIgniter 4.",
+        "illuminate/support": "Permite auto-discovery, injeção de dependência e Facade no Laravel."
+    },
+    "autoload": {
+        "psr-4": {
+            "GetCNPJ\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Config\\": "tests/Support/CodeIgniter/Config/",
+            "GetCNPJ\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check": [
+            "@composer validate --strict",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": false
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "GetCNPJ\\Integrations\\Laravel\\GetCnpjServiceProvider"
+            ],
+            "aliases": {
+                "GetCNPJ": "GetCNPJ\\Integrations\\Laravel\\Facades\\GetCNPJ"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
