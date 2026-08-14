@@ -20,6 +20,8 @@ jobs:
           coverage: none
           tools: composer:v2
       - run: composer validate --strict
+      - name: Remove framework-only development requirements
+        run: composer remove --dev codeigniter4/framework illuminate/config illuminate/support orchestra/testbench phpunit/phpunit --no-update
       - run: composer install --no-dev --prefer-dist --no-interaction --no-progress
       - name: Validate PHP syntax
         run: find src config examples -name '*.php' -print0 | xargs -0 -n1 php -l
