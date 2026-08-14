@@ -9,10 +9,10 @@
         }
     ],
     "keywords": ["cnpj", "brasil", "receita-ws", "brasil-api", "cnpja", "cnpj-ws"],
-    "homepage": "https://github.com/azumamagus/getCNPJ-php",
+    "homepage": "https://github.com/azumamagus/GetCNPJ-php",
     "support": {
-        "issues": "https://github.com/azumamagus/getCNPJ-php/issues",
-        "source": "https://github.com/azumamagus/getCNPJ-php"
+        "issues": "https://github.com/azumamagus/GetCNPJ-php/issues",
+        "source": "https://github.com/azumamagus/GetCNPJ-php"
     },
     "require": {
         "php": "^8.1",

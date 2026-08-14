@@ -1,0 +1,63 @@
+name: Publish to Packagist
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: packagist-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate semantic version tag
+        shell: bash
+        run: |
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version tag: ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate package
+        run: composer validate --strict
+
+      - name: Install development dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run test suite
+        run: composer test
+
+      - name: Notify Packagist
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_API_TOKEN: ${{ secrets.PACKAGIST_API_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -z "${PACKAGIST_USERNAME}" || -z "${PACKAGIST_API_TOKEN}" ]]; then
+            echo "Configure PACKAGIST_USERNAME and PACKAGIST_API_TOKEN in the repository secrets." >&2
+            exit 1
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header 'Content-Type: application/json' \
+            --header "Authorization: Bearer ${PACKAGIST_USERNAME}:${PACKAGIST_API_TOKEN}" \
+            --header 'User-Agent: GetCNPJ-php GitHub Actions' \
+            --data '{"repository":"https://github.com/azumamagus/GetCNPJ-php"}' \
+            'https://packagist.org/api/update-package'

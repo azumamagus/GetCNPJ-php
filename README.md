@@ -278,14 +278,24 @@ Os testes comuns não consultam as APIs públicas: usam respostas HTTP simuladas
 1. Crie um repositório público no GitHub e envie estes arquivos.
 2. Confirme o nome definitivo em `composer.json` (`azumamagus/get-cnpj`).
 3. Acesse [packagist.org/packages/submit](https://packagist.org/packages/submit) e informe a URL do repositório.
-4. Crie uma tag semântica e envie-a ao GitHub:
+4. No perfil do Packagist, copie o token **safe** da API.
+5. No GitHub, abra **Settings > Secrets and variables > Actions** e crie estes Repository Secrets:
+
+   - `PACKAGIST_USERNAME`: seu nome de usuário no Packagist;
+   - `PACKAGIST_API_TOKEN`: o token safe da API do Packagist.
+
+6. Crie uma tag semântica e envie-a ao GitHub:
 
 ```bash
 git tag -a v1.0.0 -m "Primeira versão estável"
 git push origin v1.0.0
 ```
 
-O Packagist usa as tags Git como versões instaláveis. Recomenda-se configurar o hook do GitHub exibido pelo Packagist para atualizar automaticamente as próximas versões.
+O workflow [`.github/workflows/publish-packagist.yml`](.github/workflows/publish-packagist.yml) é acionado por tags no formato `vMAJOR.MINOR.PATCH`, incluindo pré-lançamentos como `v1.1.0-beta.1`. Ele valida a tag, o `composer.json` e os testes antes de solicitar a atualização pela API oficial do Packagist.
+
+O primeiro cadastro do pacote deve ser feito pelo formulário do Packagist. Depois disso, as novas tags são publicadas automaticamente. O token safe é suficiente para atualizar um pacote existente e deve permanecer somente nos GitHub Secrets.
+
+> Tags de versões estáveis são imutáveis no Packagist. Nunca mova ou recrie uma tag publicada; para correções, crie uma nova versão.
 
 ## APIs utilizadas
 
