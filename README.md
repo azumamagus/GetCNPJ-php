@@ -1,47 +1,37 @@
-# GetCNPJ para PHP
-
-[![PHP](https://img.shields.io/badge/PHP-%5E8.1-777BB4.svg)](https://www.php.net/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
 <p align="center">
-  <img src="logo.png" width="320" alt="Logo GetCNPJ">
+  <a href="https://packagist.org/packages/azumamagus/get-cnpj">
+    <img src="https://raw.githubusercontent.com/azumamagus/GetCNPJ-php/main/logo.png" width="280" alt="GetCNPJ">
+  </a>
 </p>
 
-Biblioteca PHP para consulta de CNPJ em APIs públicas brasileiras. Normaliza os dados retornados, controla o limite de requisições e tenta automaticamente o próximo provedor quando uma API falha.
+<h1 align="center">GetCNPJ para PHP</h1>
 
-## Recursos
+<p align="center">
+  Consulte dados públicos de empresas brasileiras com resposta padronizada,<br>
+  validação de CNPJ e fallback automático entre múltiplos provedores.
+</p>
 
-- Quatro provedores: **CNPJ.WS**, **ReceitaWS**, **BrasilAPI** e **CNPJA**.
-- Fallback automático, seguindo essa ordem de prioridade.
-- CNPJ.WS como provedor principal e suporte a inscrições estaduais.
-- Validação dos dígitos verificadores; aceita CNPJ formatado ou somente números.
-- Rate limiting independente por provedor (3 requisições/minuto por padrão).
-- Cliente HTTP PSR-18 injetável e Guzzle configurado por padrão.
-- Objetos tipados e serializáveis com `json_encode()`.
-- PHP puro sem configuração adicional.
-- Auto-discovery, injeção de dependência, Facade e configuração publicável no Laravel.
-- Service Discovery e configuração por `.env` no CodeIgniter 4.
+<p align="center">
+  <a href="https://packagist.org/packages/azumamagus/get-cnpj"><img src="https://img.shields.io/packagist/v/azumamagus/get-cnpj.svg?style=flat-square" alt="Versão no Packagist"></a>
+  <a href="https://packagist.org/packages/azumamagus/get-cnpj"><img src="https://img.shields.io/packagist/dt/azumamagus/get-cnpj.svg?style=flat-square" alt="Downloads"></a>
+  <a href="https://github.com/azumamagus/GetCNPJ-php/actions/workflows/tests.yml"><img src="https://github.com/azumamagus/GetCNPJ-php/actions/workflows/tests.yml/badge.svg" alt="Testes"></a>
+  <a href="https://packagist.org/packages/azumamagus/get-cnpj"><img src="https://img.shields.io/packagist/php-v/azumamagus/get-cnpj.svg?style=flat-square" alt="Versões do PHP"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/packagist/l/azumamagus/get-cnpj.svg?style=flat-square" alt="Licença MIT"></a>
+</p>
 
-## Requisitos
+<p align="center">
+  <strong>PHP puro</strong> · <strong>Laravel</strong> · <strong>CodeIgniter 4</strong>
+</p>
 
-- PHP 8.1 ou superior.
-- Extensão JSON.
+---
 
 ## Instalação
-
-Quando o pacote estiver publicado no Packagist:
 
 ```bash
 composer require azumamagus/get-cnpj
 ```
 
-Durante o desenvolvimento local:
-
-```bash
-composer install
-```
-
-## PHP puro
+## Comece em 30 segundos
 
 ```php
 <?php
@@ -50,35 +40,102 @@ require __DIR__ . '/vendor/autoload.php';
 
 use GetCNPJ\CnpjClient;
 
-$client = new CnpjClient();
-$result = $client->get('03.312.791/0001-83');
+$result = (new CnpjClient())->get('03.312.791/0001-83');
 
 if ($result->success) {
-    $data = $result->data;
-
-    echo "Razão Social: {$data->razaoSocial}\n";
-    echo "Nome Fantasia: {$data->nomeFantasia}\n";
-    echo "CNPJ: {$data->cnpj}\n";
-    echo "Situação: {$data->situacao}\n";
-    echo "Endereço: {$data->endereco->getEnderecoCompleto()}\n";
-    echo "Provedor: {$data->provedor}\n";
-
-    foreach ($data->inscricoesEstaduais as $inscricao) {
-        echo "IE: {$inscricao}\n";
-    }
+    echo $result->data->razaoSocial . PHP_EOL;
+    echo $result->data->endereco?->getEnderecoCompleto() . PHP_EOL;
+    echo 'Provedor: ' . $result->data->provedor . PHP_EOL;
 } else {
-    echo "Erro: {$result->errorMessage}\n";
-    foreach ($result->errors as $error) {
-        echo "- {$error->providerName}: {$error->errorMessage}\n";
-    }
+    echo $result->errorMessage . PHP_EOL;
 }
 ```
 
-Um CNPJ com dígitos verificadores inválidos lança `GetCNPJ\Exceptions\InvalidCnpjException` antes de qualquer chamada HTTP.
+O CNPJ pode ser informado com ou sem máscara. A biblioteca valida os dígitos verificadores antes de realizar qualquer chamada HTTP.
+
+## Por que usar?
+
+- **Fallback automático:** se um serviço estiver indisponível, o próximo provedor é consultado.
+- **Resposta padronizada:** trabalhe com o mesmo modelo de dados, independentemente da API utilizada.
+- **Quatro provedores:** CNPJ.WS, ReceitaWS, BrasilAPI e CNPJA.
+- **Inscrição estadual:** retornada pelo CNPJ.WS quando disponível.
+- **Rate limiting:** limite independente por provedor, com Sliding Window.
+- **Validação local:** CNPJs inválidos não consomem requisições externas.
+- **Integrações nativas:** PHP puro, container e Facade no Laravel e Service Discovery no CodeIgniter 4.
+- **Extensível e testável:** cliente HTTP PSR-18 injetável e objetos tipados serializáveis em JSON.
+
+## Compatibilidade
+
+| Ambiente | Versão | Forma de uso |
+|---|---:|---|
+| PHP puro | PHP 8.1+ | `new CnpjClient()` |
+| Laravel | 10, 11, 12 e 13 | Injeção, singleton e Facade |
+| CodeIgniter | 4.x | `service('getCnpj')` |
+| HTTP | PSR-18 | Guzzle incluído ou cliente customizado |
+
+> O núcleo é testado em PHP 8.1. As integrações com as versões atuais de Laravel e CodeIgniter 4 são testadas em PHP 8.2, 8.3 e 8.4.
+
+## Provedores e fallback
+
+Os provedores são consultados nesta ordem:
+
+| Prioridade | Provedor | Inscrição estadual | Endereço | QSA | Simples Nacional |
+|---:|---|:---:|:---:|:---:|:---:|
+| 1 | [CNPJ.WS](https://publica.cnpj.ws/) | ✅ | ✅ | ✅ | ✅ |
+| 2 | [ReceitaWS](https://receitaws.com.br/) | — | ✅ | ✅ | ✅ |
+| 3 | [BrasilAPI](https://brasilapi.com.br/) | — | ✅ | ✅ | ✅ |
+| 4 | [CNPJA](https://cnpja.com/) | — | ✅ | ✅ | ✅ |
+
+Quando um provedor falha, a exceção é registrada em `$result->errors` e a consulta segue para o próximo. Se todos falharem, o resultado contém os detalhes de cada tentativa.
+
+## Sumário
+
+- [PHP puro](#php-puro)
+- [Laravel](#laravel)
+- [CodeIgniter 4](#codeigniter-4)
+- [Provedor específico](#provedor-específico)
+- [Configuração avançada](#configuração-avançada)
+- [Modelo retornado](#modelo-retornado)
+- [Tratamento de erros](#tratamento-de-erros)
+- [Rate limiting](#rate-limiting)
+- [Desenvolvimento e testes](#desenvolvimento-e-testes)
+- [Publicação de versões](#publicação-de-versões)
+
+## PHP puro
+
+```php
+use GetCNPJ\CnpjClient;
+
+$client = new CnpjClient();
+$result = $client->get('03312791000183');
+
+if (!$result->success) {
+    foreach ($result->errors as $error) {
+        echo "{$error->providerName}: {$error->errorMessage}" . PHP_EOL;
+    }
+
+    return;
+}
+
+$empresa = $result->data;
+
+echo $empresa->cnpj . PHP_EOL;
+echo $empresa->razaoSocial . PHP_EOL;
+echo $empresa->nomeFantasia . PHP_EOL;
+echo $empresa->situacao . PHP_EOL;
+
+foreach ($empresa->telefones as $telefone) {
+    echo $telefone . PHP_EOL;
+}
+
+foreach ($empresa->inscricoesEstaduais as $inscricao) {
+    echo $inscricao . PHP_EOL;
+}
+```
 
 ## Laravel
 
-O Laravel encontra automaticamente o Service Provider e a Facade declarados pelo pacote. Depois do `composer require`, nenhuma inclusão manual em `bootstrap/providers.php` ou `config/app.php` é necessária.
+O Laravel encontra automaticamente o Service Provider e a Facade declarados no pacote. Não é necessário editar `bootstrap/providers.php` ou `config/app.php`.
 
 ### Injeção de dependência
 
@@ -88,17 +145,18 @@ O Laravel encontra automaticamente o Service Provider e a Facade declarados pelo
 namespace App\Http\Controllers;
 
 use GetCNPJ\CnpjClient;
+use Illuminate\Http\JsonResponse;
 
 final class EmpresaController extends Controller
 {
-    public function show(string $cnpj, CnpjClient $client)
+    public function show(string $cnpj, CnpjClient $client): JsonResponse
     {
         return response()->json($client->get($cnpj));
     }
 }
 ```
 
-O `CnpjClient` é registrado como singleton no container. Também pode ser resolvido diretamente:
+O cliente é registrado como singleton e também pode ser resolvido diretamente:
 
 ```php
 $client = app(\GetCNPJ\CnpjClient::class);
@@ -106,32 +164,27 @@ $client = app(\GetCNPJ\CnpjClient::class);
 
 ### Facade
 
-O alias `GetCNPJ` é registrado por auto-discovery:
-
-```php
-use GetCNPJ\ProviderType;
-
-$result = \GetCNPJ::get('03.312.791/0001-83');
-$brasilApi = \GetCNPJ::getFromProvider('03312791000183', ProviderType::BrasilAPI);
-```
-
-Se preferir importar a classe explicitamente:
-
 ```php
 use GetCNPJ\Integrations\Laravel\Facades\GetCNPJ;
+use GetCNPJ\ProviderType;
 
 $result = GetCNPJ::get('03.312.791/0001-83');
+
+$brasilApi = GetCNPJ::getFromProvider(
+    '03312791000183',
+    ProviderType::BrasilAPI,
+);
 ```
 
 ### Configuração do Laravel
 
-Publique o arquivo opcional `config/getcnpj.php`:
+Publique o arquivo `config/getcnpj.php`:
 
 ```bash
 php artisan vendor:publish --tag=getcnpj-config
 ```
 
-As opções também podem ser definidas no `.env`:
+Configure pelo `.env`:
 
 ```dotenv
 GETCNPJ_TIMEOUT=30
@@ -142,11 +195,11 @@ GETCNPJ_ENABLE_BRASIL_API=true
 GETCNPJ_ENABLE_CNPJA=true
 ```
 
-Quando a aplicação possui uma implementação de `Psr\Http\Client\ClientInterface` registrada no container, o pacote a utiliza automaticamente. Caso contrário, utiliza o Guzzle interno.
+Se houver uma implementação de `Psr\Http\Client\ClientInterface` registrada no container, ela será utilizada automaticamente. Caso contrário, o pacote usa o Guzzle incluído.
 
 ## CodeIgniter 4
 
-O CodeIgniter 4 descobre automaticamente o arquivo `GetCNPJ\Config\Services` por meio do namespace PSR-4 do Composer. Com o Service Discovery habilitado — configuração padrão do framework — o cliente fica disponível como um serviço compartilhado:
+Com o Service Discovery padrão habilitado, o CodeIgniter encontra automaticamente `GetCNPJ\Config\Services`:
 
 ```php
 <?php
@@ -166,21 +219,19 @@ final class Empresa extends BaseController
 }
 ```
 
-Chamadas repetidas a `service('getCnpj')` retornam a mesma instância. Para solicitar uma nova instância:
+`service('getCnpj')` retorna uma instância compartilhada. Para criar uma nova instância:
 
 ```php
 $client = single_service('getCnpj');
 ```
 
-Também é possível acessar a classe de serviços diretamente:
+Também é possível acessar o serviço diretamente:
 
 ```php
 $client = \GetCNPJ\Config\Services::getCnpj();
 ```
 
-### Configuração do CodeIgniter 4
-
-Use as propriedades da classe `GetCNPJ\Config\GetCnpj` no `.env`. O CodeIgniter converte os valores para os tipos declarados:
+Configure pelo `.env` do CodeIgniter:
 
 ```dotenv
 getcnpj.timeout = 30
@@ -191,9 +242,11 @@ getcnpj.enableBrasilApi = true
 getcnpj.enableCnpja = true
 ```
 
-Se o projeto desabilitou `discoverInComposer` em `app/Config/Modules.php`, use `\GetCNPJ\Config\Services::getCnpj()` diretamente ou inclua `azumamagus/get-cnpj` na lista de pacotes permitidos para descoberta.
+Se `discoverInComposer` estiver desabilitado em `app/Config/Modules.php`, use `\GetCNPJ\Config\Services::getCnpj()` ou permita `azumamagus/get-cnpj` na descoberta de pacotes.
 
 ## Provedor específico
+
+Use o enum para evitar erros de digitação:
 
 ```php
 use GetCNPJ\CnpjClient;
@@ -207,9 +260,9 @@ $result = $client->getFromProvider(
 );
 ```
 
-Também é possível informar o nome como string: `CNPJWS`, `ReceitaWS`, `BrasilAPI` ou `CNPJA`. A comparação não diferencia maiúsculas de minúsculas.
+Também são aceitas as strings `CNPJWS`, `ReceitaWS`, `BrasilAPI` e `CNPJA`, sem diferenciação entre maiúsculas e minúsculas.
 
-## Configuração
+## Configuração avançada
 
 ```php
 use GetCNPJ\CnpjClient;
@@ -225,12 +278,11 @@ $options = new CnpjClientOptions(
 );
 
 $client = new CnpjClient(options: $options);
-$result = $client->get('03312791000183');
 ```
 
-## Cliente HTTP customizado
+### Cliente HTTP customizado
 
-Qualquer cliente que implemente `Psr\Http\Client\ClientInterface` pode ser usado:
+Qualquer cliente PSR-18 pode ser injetado:
 
 ```php
 use GetCNPJ\CnpjClient;
@@ -245,67 +297,152 @@ $http = new Client([
 $client = new CnpjClient(httpClient: $http);
 ```
 
+Isso também facilita testes, observabilidade, proxies e políticas HTTP próprias da aplicação.
+
 ## Modelo retornado
 
-Em caso de sucesso, `$result->data` é um `CnpjData` com os campos:
-
-- `cnpj`, `razaoSocial`, `nomeFantasia`, `dataAbertura`, `situacao`, `dataSituacao`;
-- `tipo`, `porte`, `naturezaJuridica`, `capitalSocial`;
-- `endereco`, `atividadePrincipal`, `atividadesSecundarias`;
-- `quadroSocietario`, `telefones`, `email`, `inscricoesEstaduais`;
-- `simples`, `ultimaAtualizacao` e `provedor`.
-
-Datas são instâncias de `DateTimeImmutable`. O resultado completo pode ser convertido para JSON:
+Uma consulta sempre retorna `GetCNPJ\Models\CnpjResult`:
 
 ```php
-echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$result->success;         // bool
+$result->data;            // ?CnpjData
+$result->errorMessage;    // ?string
+$result->errors;          // ProviderError[]
+$result->getFailedProviders();
+```
+
+Em caso de sucesso, `CnpjData` oferece:
+
+| Grupo | Propriedades |
+|---|---|
+| Identificação | `cnpj`, `razaoSocial`, `nomeFantasia` |
+| Cadastro | `dataAbertura`, `situacao`, `dataSituacao`, `tipo`, `porte` |
+| Jurídico | `naturezaJuridica`, `capitalSocial` |
+| Localização | `endereco` |
+| Atividades | `atividadePrincipal`, `atividadesSecundarias` |
+| Pessoas | `quadroSocietario` |
+| Contato | `telefones`, `email` |
+| Fiscal | `inscricoesEstaduais`, `simples` |
+| Origem | `ultimaAtualizacao`, `provedor` |
+
+Datas são instâncias de `DateTimeImmutable`. Todos os modelos implementam `JsonSerializable`:
+
+```php
+echo json_encode(
+    $result,
+    JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
+);
+```
+
+Exemplo resumido:
+
+```json
+{
+  "success": true,
+  "data": {
+    "cnpj": "03.312.791/0001-83",
+    "razaoSocial": "SOS SYSTEM TECNOLOGIA EM INFORMATICA LTDA",
+    "situacao": "Ativa",
+    "telefones": ["(14) 3206-2096"],
+    "provedor": "CNPJWS"
+  },
+  "errorMessage": null,
+  "errors": []
+}
+```
+
+## Tratamento de erros
+
+### CNPJ inválido
+
+Um CNPJ com tamanho ou dígitos verificadores inválidos lança `InvalidCnpjException` antes da consulta:
+
+```php
+use GetCNPJ\Exceptions\InvalidCnpjException;
+
+try {
+    $result = (new CnpjClient())->get('00.000.000/0000-00');
+} catch (InvalidCnpjException $exception) {
+    echo $exception->getMessage();
+}
+```
+
+### Falha dos provedores
+
+Erros de rede ou respostas inválidas não interrompem o fallback. Se todos os provedores falharem:
+
+```php
+if (!$result->success) {
+    echo $result->errorMessage . PHP_EOL;
+
+    foreach ($result->errors as $error) {
+        echo "{$error->providerName}: {$error->errorMessage}" . PHP_EOL;
+    }
+}
 ```
 
 ## Rate limiting
 
-O algoritmo Sliding Window registra limites separadamente para cada provedor. Ao atingir o limite, a chamada aguarda até a requisição mais antiga sair da janela de um minuto. O estado fica em memória e vale para a instância atual do cliente.
+O Sliding Window mantém um contador separado para cada provedor. Por padrão são permitidas três requisições por minuto para cada serviço. Quando o limite é atingido, a chamada aguarda até a requisição mais antiga sair da janela.
 
-## Testes
+O controle permanece em memória durante a vida da instância de `CnpjClient`. Em aplicações distribuídas, configure limites também na infraestrutura ou implemente `RateLimiterInterface` com armazenamento compartilhado.
+
+## Uso responsável
+
+Este pacote consulta APIs públicas de terceiros. Portanto:
+
+- respeite os termos e limites de cada provedor;
+- espere indisponibilidades e mudanças externas de contrato;
+- não trate os dados como substitutos de uma certidão oficial;
+- use cache quando realizar consultas repetidas;
+- observe a legislação aplicável ao tratamento e armazenamento de dados.
+
+## Desenvolvimento e testes
 
 ```bash
+git clone https://github.com/azumamagus/GetCNPJ-php.git
+cd GetCNPJ-php
+composer install
 composer test
 ```
 
-Os testes comuns não consultam as APIs públicas: usam respostas HTTP simuladas para verificar validação, fallback, mapeamento e rate limiting. A suíte também inicializa ambientes reais do Laravel e CodeIgniter 4 para validar container, Facade, configuração e serviços compartilhados.
+A suíte usa respostas HTTP simuladas para validar CNPJ, mapeamento, fallback e rate limiting. Também inicializa ambientes reais dos frameworks para testar container e Facade do Laravel e serviços do CodeIgniter 4.
 
-## Publicação no Packagist
+O GitHub Actions executa:
 
-1. Crie um repositório público no GitHub e envie estes arquivos.
-2. Confirme o nome definitivo em `composer.json` (`azumamagus/get-cnpj`).
-3. Acesse [packagist.org/packages/submit](https://packagist.org/packages/submit) e informe a URL do repositório.
-4. No perfil do Packagist, copie o token **safe** da API.
-5. No GitHub, abra **Settings > Secrets and variables > Actions** e crie estes Repository Secrets:
+- instalação de produção e validação de sintaxe no PHP 8.1;
+- suíte completa com integrações nos PHP 8.2, 8.3 e 8.4.
 
-   - `PACKAGIST_USERNAME`: seu nome de usuário no Packagist;
-   - `PACKAGIST_API_TOKEN`: o token safe da API do Packagist.
+## Publicação de versões
 
-6. Crie uma tag semântica e envie-a ao GitHub:
+O pacote está disponível em [packagist.org/packages/azumamagus/get-cnpj](https://packagist.org/packages/azumamagus/get-cnpj).
+
+Novas versões são publicadas automaticamente ao enviar uma tag semântica:
 
 ```bash
-git tag -a v1.0.0 -m "Primeira versão estável"
+git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
 ```
 
-O workflow [`.github/workflows/publish-packagist.yml`](.github/workflows/publish-packagist.yml) é acionado por tags no formato `vMAJOR.MINOR.PATCH`, incluindo pré-lançamentos como `v1.1.0-beta.1`. Ele valida a tag, o `composer.json` e os testes antes de solicitar a atualização pela API oficial do Packagist.
+O workflow valida a tag, o Composer e os testes antes de notificar a API oficial do Packagist. Pré-lançamentos como `v1.1.0-beta.1` também são aceitos.
 
-O primeiro cadastro do pacote deve ser feito pelo formulário do Packagist. Depois disso, as novas tags são publicadas automaticamente. O token safe é suficiente para atualizar um pacote existente e deve permanecer somente nos GitHub Secrets.
+> Uma versão estável publicada no Packagist é imutável. Para corrigir uma versão, crie uma nova tag; nunca mova ou recrie uma tag existente.
 
-> Tags de versões estáveis são imutáveis no Packagist. Nunca mova ou recrie uma tag publicada; para correções, crie uma nova versão.
+## Contribuindo
 
-## APIs utilizadas
+Issues e pull requests são bem-vindos. Ao contribuir:
 
-- [CNPJ.WS](https://publica.cnpj.ws/)
-- [ReceitaWS](https://receitaws.com.br/)
-- [BrasilAPI](https://brasilapi.com.br/)
-- [CNPJA](https://cnpja.com/)
-
-Respeite os termos e limites de uso de cada serviço. As APIs podem ficar indisponíveis ou alterar seus contratos sem aviso.
+1. crie uma branch para a alteração;
+2. adicione ou atualize os testes;
+3. execute `composer test`;
+4. abra um pull request descrevendo o comportamento alterado.
 
 ## Licença
 
-MIT. Consulte [LICENSE](LICENSE).
+Distribuído sob a licença MIT. Consulte [LICENSE](LICENSE).
+
+---
+
+<p align="center">
+  Feito para tornar consultas de CNPJ simples, resilientes e independentes de framework.
+</p>
